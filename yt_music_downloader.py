@@ -1,5 +1,5 @@
 """
-pip install streamlit selenium webdriver-manager pytube
+pip install streamlit selenium webdriver-manager pytube　yt_dlp
 python -m streamlit run yt_music_downloader.py
 """
 
