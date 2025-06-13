@@ -12,5 +12,5 @@ PM & Maintainer：[Crystal](https://github.com/x200706)
 - [ ]  整理原始碼
 
 # Bug
-- [ ] 歌曲超過特定數目，UI的按鈕消失了
+- [ ] 歌曲超過特定數目（經過測試為20首），UI的submit按鈕消失了
   ![image](https://github.com/user-attachments/assets/30bbca7b-5e71-44ab-9841-9ba6d3bbc0fd)
