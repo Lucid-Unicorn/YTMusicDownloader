@@ -1,6 +1,6 @@
 # YTMusicDownloader
 僅供學習使用
-RD：[Faiz](https://github.com/faiz135753)
+RD：[Faiz](https://github.com/faiz135753)\
 PM：[Crystal](https://github.com/x200706)
 
 # Roadmap
