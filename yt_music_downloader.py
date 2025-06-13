@@ -9,7 +9,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 import re
 
-from pytube import YouTube
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -38,7 +37,7 @@ def sanitize_filename(name):
 @st.cache_resource # Cache the driver for the session to avoid re-initializing
 def get_driver():
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless') # Run browser in the background
+    options.add_argument('--headless') # Run browser in the background
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
@@ -49,6 +48,16 @@ def get_driver():
     # Use webdriver-manager to automatically handle ChromeDriver
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     return driver
+
+def check_ffmpeg_available():
+    import subprocess
+    try:
+        result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return True
+    except FileNotFoundError:
+        pass
+    return False
 
 def close_driver():
     # Function to properly close the Selenium WebDriver
@@ -127,12 +136,13 @@ def search_yt_music_songs(driver, query, search_type, max_songs=20):
             href = a.get_attribute("href")
             if 'watch' in href:
                 href = href.replace("https://music.", "https://www.")
-                songs_data.append({
-                    'title': text,
-                    'url': href,
-                    'id': href # Use URL as a unique ID for selection
-                })
-                seen_urls.add(href)
+                if not href in seen_urls:
+                    songs_data.append({
+                        'title': text,
+                        'url': href,
+                        'id': href # Use URL as a unique ID for selection
+                    })
+                    seen_urls.add(href)
 
         st.write(f"已捲動 {i+1}/{num_scrolls} 次，目前找到 {len(songs_data)} 首歌曲...")
         if len(songs_data) >= max_songs:
@@ -148,20 +158,23 @@ def download_song_pytube(video_url, display_title, download_path_base):
     try:
         url = video_url
 
-        ydl_opts = {
-            'format': 'best',
-            'outtmpl': f'./music/%(title)s.mp3',  # 下載檔名為影片標題
-        }
-        # ydl_opts = {
-        #     'format': 'bestaudio/best',
-        #     'outtmpl': f'./music/%(title)s.%(ext)s',  # 下載檔名為影片標題
-        #     'postprocessors': [{  # 轉檔設定
-        #         'key': 'FFmpegExtractAudio',
-        #         'preferredcodec': 'mp3',
-        #         'preferredquality': '192',
-        #     }],
-        #     'quiet': False,
-        # }
+        if check_ffmpeg_available():
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': f'./music/%(title)s.%(ext)s',  # 下載檔名為影片標題
+                'postprocessors': [{  # 轉檔設定
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'quiet': False,
+            }
+        else:
+            ydl_opts = {
+                'format': 'best',
+                'outtmpl': f'./music/%(title)s.mp3',  # 下載檔名為影片標題
+            }
+
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -239,9 +252,10 @@ if st.session_state.search_results:
             data_cols[0].text(song['title'])
             data_cols[1].html(f"<a href={song['url']} target='_blank'>{song['url']}</a>")
            
-            # Checkbox value is True if song ID was previously selected
+            # Checkbox.value is True if song ID was previously selected
             is_selected_default = song['id'] in st.session_state.selected_songs_ids
             current_checkbox_states[song['id']] = data_cols[2].checkbox("", value=is_selected_default, key=f"cb_{song['id']}")
+
         
         form_submit_button = st.form_submit_button("💾 更新選擇並準備下載")
 
