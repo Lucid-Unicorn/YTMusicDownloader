@@ -1,7 +1,7 @@
 # YTMusicDownloader
 僅供學習使用\
 RD：[Faiz](https://github.com/faiz135753)\
-PM：[Crystal](https://github.com/x200706)
+PM & Maintainer：[Crystal](https://github.com/x200706)
 
 # Roadmap
 - [ ] 移除藝人搜尋相關功能
