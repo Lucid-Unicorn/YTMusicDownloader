@@ -9,6 +9,7 @@ PM：[Crystal](https://github.com/x200706)
 - [ ] Selenium改為無頭瀏覽器模式
   - [ ] 完善搜尋結果顯示，增加作者
 - [ ]  搜尋結果的網址應該從Youtube改為Youtube Music
+- [ ]  整理原始碼
 
 # Bug
 - [ ] 歌曲超過特定數目，UI的按鈕消失了
